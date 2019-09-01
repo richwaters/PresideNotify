@@ -32,8 +32,9 @@ using terms from application "Mail"
 			-- Setup the call to curl which will post the notification
 			set cmdLine to "curl -v --user '" & ghUser & ":" & ghPassword & "' 'https://users.preside.io/preside/GHSendPushMsg?ghContentReady=1&messageId=" & encodedMessageId & "&ghAccountName=" & accountName & "&ghFolderPath=" & folderName & "&alertMsg=" & encodedTxt & "'"
 			
-			--do shell script "echo " & quoted form of (cmdLine as string) & Â
-			" > ~/Desktop/as_debug.txt"
+			-- Uncomment the following line to debug url
+			-- do shell script "echo " & quoted form of (cmdLine as string) & ¬
+			" > /tmp/PresideNotify_debug.txt"
 			
 			do shell script cmdLine
 		end repeat
