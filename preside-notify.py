@@ -1,6 +1,7 @@
 
 
-#https://blog.timstoop.nl/posts/2009/03/11/python-imap-idle-with-imaplib2.html
+# This script uses the concepts from this blog entry.
+# https://blog.timstoop.nl/posts/2009/03/11/python-imap-idle-with-imaplib2.html
 
 
 import imaplib2, time, requests, email, urllib, datetime
