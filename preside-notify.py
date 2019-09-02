@@ -1,13 +1,14 @@
-
+#!/usr/bin/python3
 
 # This script uses the concepts from this blog entry.
 # https://blog.timstoop.nl/posts/2009/03/11/python-imap-idle-with-imaplib2.html
 
 
-import imaplib2, time, requests, email, urllib, datetime
+import imaplib2
+import time, requests, email, urllib, datetime
 from email.parser import HeaderParser
 from threading import *
-import thread
+
 import json
 
 MonitoredFolders = [
@@ -22,17 +23,17 @@ MonitoredFolders = [
         'idleTimeout' : 29 * 60
     },
     
-    # Another account or folder to monitor - Remove this entry if you only have 1 account
-    {
-        'user': "",                # Your IMAP user id
-        'password' : "",           # Your IMAP password
-        'server' : "",             # Your IMAP SERVER
-        'folder' : "",
-        'accountName' : "",        # Should match name of account in Preside app
-        'presideIoUser' : "",      # Your Preside.io user name (email address)
-        'presideIoPassword' : "",  # Your Preside.io password
-        'idleTimeout' : 29 * 60
-    },
+    # # Another account or folder to monitor - Remove this entry if you only have 1 account
+    # {
+    #     'user': "",                # Your IMAP user id
+    #     'password' : "",           # Your IMAP password
+    #     'server' : "",             # Your IMAP SERVER
+    #     'folder' : "",
+    #     'accountName' : "",        # Should match name of account in Preside app
+    #     'presideIoUser' : "",      # Your Preside.io user name (email address)
+    #     'presideIoPassword' : "",  # Your Preside.io password
+    #     'idleTimeout' : 29 * 60
+    # },
 
 ]
 
@@ -127,7 +128,7 @@ class Idler(object):
                     'ghContentReady' : 1
                 }
 
-                qStr = urllib.urlencode( qDict )
+                qStr = urllib.parse.urlencode( qDict )
                               
 
                 req = 'https://users.preside.io/preside/GHSendPushMsg?' + qStr
@@ -154,8 +155,8 @@ def doIdle( monitoredFolder ):
         #time.sleep(29*60)
         time.sleep(8*60*60)
 
-    except e:
-        print str(e)
+    except:
+        #print( str(e) )
         raise
 
     finally:
@@ -168,8 +169,9 @@ def doIdle( monitoredFolder ):
        
 def logInfo( msg ):
     pass
-    #uncomment for debugging
-    #print str(datetime.datetime.now()) + ': ' + msg
+
+    # Uncomment this line for some verbosity
+    #print ( str(datetime.datetime.now()) + ': ' + msg)
 
 
 def maintainIdle( monitoredFolder ):
@@ -179,7 +181,8 @@ def maintainIdle( monitoredFolder ):
 
 
 for monitoredFolder in MonitoredFolders:
-     thread.start_new_thread( maintainIdle, (monitoredFolder, ) )
+    t = Thread( target=maintainIdle, args=(monitoredFolder, ) )
+    t.start()                
 
 
 # This doesn't work for some reason so just loop and sleep for a day at a time
