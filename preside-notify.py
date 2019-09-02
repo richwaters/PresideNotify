@@ -119,7 +119,13 @@ class Idler(object):
                 messageId = h['Message-ID']
 
 
-                qDict = { 'alertMsg' : alertMsg, 'ghAccountName' : self.monitoredFolder['accountName'], 'ghFolderPath' : self.monitoredFolder['folder'],  'messageId' : messageId, 'ghContentReady' : 1 }
+                qDict = {
+                    'alertMsg' : alertMsg,
+                    'ghAccountName' : self.monitoredFolder['accountName'],
+                    'ghFolderPath' : self.monitoredFolder['folder'],
+                    'messageId' : messageId,
+                    'ghContentReady' : 1
+                }
 
                 qStr = urllib.urlencode( qDict )
                               

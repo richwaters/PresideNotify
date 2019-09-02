@@ -5,11 +5,11 @@ PresideNotify is of tools for monitoring email Inboxes and/or folders and sendin
 <br/>
       
 ## Prerequisites
-Before using these monitoring tools, you should go to the More > Syncing screen in Preside and set the 'Background Sync' type to "Remote (private computer)". That should lead you through a process whereby you register for a Preside.io account if you don't already have one. You should also enable the 'New email notification' option on that same 'Syncing & Notifications' screen. That should obtain permission from iOS to issue notifications. 
+Before using these monitoring tools, you should go to the More > Syncing screen in Preside and set the 'Background Sync' type to "Remote (private computer)". That should lead you through a process whereby you register for a Preside.io account if you don't already have one. You should also enable the 'New email notification' option on that same 'Syncing & Notifications' screen. That should obtain permission from iOS to issue notifications. Finally, on that screen, scroll down a little to the 'Remote notifications' section and set the 'Manager' option to 'Remote'.
 
 To check to make sure you have everything setup properly, open the terminal app or other shell and issue a 'curl' command like:
 
-curl --user https://users.preside.io/preside/GHSendPushMsg?alertMsg=Test. 
+   curl --user '<Preside.io user name>:<Preside.io password>' https://users.preside.io/preside/GHSendPushMsg?alertMsg=Test 
 
 That should cause a notification to appear on your device.             
 
@@ -21,9 +21,23 @@ The Applescript option uses the Mac Mail app to monitor for new emails. You'll n
 
 To make use of this tool, start by downloading the PresideNotify.applescript file. Then double click on the file to open it in the Applescript Editor. Next, edit the 'set ghUser to ""' line and insert your own Preside.io user name between the "".  Then, edit the 'set ghPassword to ""' line and insert your Preside.io password in between the "". Exit the Applescript Editor and move the script into the ~/Library/Application\ Scripts/com.apple.mail folder.
 
-At this point the applescript is configured and is ready to be setup as a rule inside the Mac Mail app. To do that, open the Mail app and click 'Mail' then 'Preferences'. Then click on 'Rules' towards the top right. Next, click 'Add rule' to create the new rule. Enter 'PresideNotify' for the 'Description'. Then, change the criteria to 'If *any* conditions are met' and '*Every message'. Next, change the actions to '*Run applescript*' and select the PresideNotify applescript.
+At this point the applescript is configured and is ready to be setup as a rule inside the Mac Mail app. To do that, open the Mail app and click 'Mail' then 'Preferences'. Then click on 'Rules' towards the top right. Next, click 'Add rule' to create the new rule. Enter 'PresideNotify' for the 'Description'. Then, change the criteria to 'If **any** conditions are met' and '**Every message**'. Next, change the actions to '**Run applescript**' and select the PresideNotify applescript.
+
+This screenshot shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
 
 ![](PresideMailRuleScreenshot.png)
+
+
+After saving the rule, make sure that it is 'checked' in the list of rules.
+
+That's it. You should now be notified whenever a new message is received and the Mac Mail app is running.
+
+
+
+
+## Python Monitoring
+
+The python monitoring option is slightly more advanced, in that is can be run as a daemon and/or on a server, but it only works with IMAP accounts. Also, it won't work with OAuth authentication. To set it up, download the preside-notify.py script. Then, fill in the appropriate values for the 'MonitoredFolders' variable and run the script. 
 
 
 
