@@ -56,20 +56,20 @@ This section documents the URL paramateters that can be passed to Preside.io to 
 
 - *alertMsg* - This is the message that will be displayed in the notification.
 - *badgeNum* - This can be used to badge the applicationIcon with the provided number.
-- *alertSound* - This specifies a sound to play for the notification. The available sounds are:
-    GHSound_Applause.mp3
-    GHSound_Piano1.mp3
-    GHSound_ChurchBell.caf
-    GHSound_Silence.wav
-    GHSound_ChurchBell.mp3
-    GHSound_Symbol.mp3
-    GHSound_Comedy.mp3
-    GHSound_Tock.mp3
-    GHSound_DogBark.mp3
-    GHSound_TulaBass.mp3
-    GHSound_Forest.mp3         
-    GHSound_LaserShot.mp3      
-    GHSound_LuneCalls.mp3
+- *alertSound* - This specifies a sound to play for the notification. The available sounds are:  
+    GHSound_Applause.mp3  
+    GHSound_Piano1.mp3  
+    GHSound_ChurchBell.mp3  
+    GHSound_Silence.wav  
+    GHSound_ChurchBell.mp3  
+    GHSound_Symbol.mp3  
+    GHSound_Comedy.mp3  
+    GHSound_Tock.mp3  
+    GHSound_DogBark.mp3  
+    GHSound_TulaBass.mp3  
+    GHSound_Forest.mp3          
+    GHSound_LaserShot.mp3        
+    GHSound_LuneCalls.mp3  
 - *dontWakeApp* - This will deliver the notification without waking the app to perform a background refresh.
 - *ghContentReady* - This can be set to 1 to tell the app to wake up and sync emails in order that it has the email loaded when a notification is tapped. The 'dontWakeApp' parameter will be ignored if 'ghContentReady' is set to 1.
 
