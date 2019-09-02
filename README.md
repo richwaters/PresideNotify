@@ -77,6 +77,10 @@ This section documents the URL paramateters that can be passed to Preside.io to 
     - *ghAccountName* -  This specifies the account in which the email was received.
     - *ghFolderPath* - This is the folder (or INBOX) in which the email was received.
     - *messageId* - This is the messageId for the new email
+    - *accountInfoHash* - This is an alternate means of specifying the account .The value can be obtained from the app, but this should generally not be used.
+
+-*deviceId* - This can be used to send the notification to a specific device. The value can be obtained from the app, but this should generally not be used.
+
 
 
 
