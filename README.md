@@ -32,7 +32,7 @@ After saving the rule, make sure that it is 'checked' in the list of rules.
 
 That's it. You should now be notified whenever a new message is received and the Mac Mail app is running.
 
-
+<br/>
 
 
 ## Python Monitoring
