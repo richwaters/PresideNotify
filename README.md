@@ -53,10 +53,10 @@ At this point, the script is ready to run.
 ## URL Reference
 This section documents the URL paramateters that can be passed to Preside.io to invoke push notifications. The first part of the URL, itself is specfified as: **https://users.preside.io/preside/GHSendPushMsg** followed by various URL variables. These variables are each optional. Their values must be url encoded with the proper percent encoding as defined in RFC 3896. 
 
-- alertMessage - This is the message that will be displayed in the notification.
-- ghContentReady - This can be set to 1 to tell the app to wake up and sync emails in order that it has the email loaded when a notification is tapped. The parameters below are only used if this one is set to 1, as they are useful in helping the app know what should be synced in order to download the email.
-- ghAccountName -  This specifies the account in which the email was received.
-- ghFolderPath - This is the folder (or INBOX) in which the email was received.
-- messageId - This is the messageId for the new email
+- *alertMessage* - This is the message that will be displayed in the notification.
+- *ghContentReady* - This can be set to 1 to tell the app to wake up and sync emails in order that it has the email loaded when a notification is tapped. The parameters below are only used if this one is set to 1, as they are useful in helping the app know what should be synced in order to download the email.
+- *ghAccountName* -  This specifies the account in which the email was received.
+- *ghFolderPath* - This is the folder (or INBOX) in which the email was received.
+- *messageId* - This is the messageId for the new email
 
 
