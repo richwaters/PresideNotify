@@ -48,6 +48,7 @@ At this point, the script is ready to run.
 - The python option only works with IMAP accounts
 - Also, it won't work with accounts that require OAuth authentication. You might be able to work around that issue by creating an app-specific password and using that in the script.
 
+<br/>
 
 
 ## URL Reference
