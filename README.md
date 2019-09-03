@@ -23,10 +23,7 @@ To make use of this tool, start by downloading the PresideNotify.applescript fil
 
 At this point the applescript is configured and is ready to be setup as a rule inside the Mac Mail app. To do that, open the Mail app and click 'Mail' then 'Preferences'. Then click on 'Rules' towards the top right. Next, click 'Add rule' to create the new rule. Enter 'PresideNotify' for the 'Description'. Then, change the criteria to 'If **any** conditions are met' and '**Every message**'. Next, change the actions to '**Run applescript**' and select the PresideNotify applescript.
 
-This screenshot shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
-
-![](PresideMailRuleScreenshot.png)
-
+[This screenshot](PresideMailRuleScreenshot.png) shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
 
 After saving the rule, make sure that it is 'checked' in the list of rules.
 
@@ -79,7 +76,7 @@ This section documents the URL paramateters that can be passed to Preside.io to 
     - *messageId* - This is the messageId for the new email
     - *accountInfoHash* - This is an alternate means of specifying the account .The value can be obtained from the app, but this should generally not be used.
 
--*deviceId* - This can be used to send the notification to a specific device. The value can be obtained from the app, but this should generally not be used.
+- *deviceId* - This can be used to send the notification to a specific device. The value can be obtained from the app, but this should generally not be used.
 
 
 
