@@ -11,31 +11,9 @@ from threading import *
 
 import json
 
-MonitoredFolders = [
-    {
-        'user': "",                # Your IMAP user id
-        'password' : "",           # Your IMAP password
-        'server' : "",             # Your IMAP SERVER
-        'folder' : "INBOX",
-        'accountName' : "",        # Should match name of account in Preside app
-        'presideIoUser' : "",      # Your Preside.io user name (email address)
-        'presideIoPassword' : "",  # Your Preside.io password
-        'idleTimeout' : 29 * 60
-    },
-    
-    # # Another account or folder to monitor - Remove this entry if you only have 1 account
-    # {
-    #     'user': "",                # Your IMAP user id
-    #     'password' : "",           # Your IMAP password
-    #     'server' : "",             # Your IMAP SERVER
-    #     'folder' : "",
-    #     'accountName' : "",        # Should match name of account in Preside app
-    #     'presideIoUser' : "",      # Your Preside.io user name (email address)
-    #     'presideIoPassword' : "",  # Your Preside.io password
-    #     'idleTimeout' : 29 * 60
-    # },
-
-]
+global MonitoredFolders;
+with open('preside-config.json') as f:
+    MonitoredFolders = json.load(f)
 
  
 # This is the threading object that does all the waiting on 
@@ -83,7 +61,7 @@ class Idler(object):
 
             logInfo( 'Sending IDLE' )
             
-            self.imapConnection.idle(callback=callback, timeout=self.monitoredFolder['idleTimeout'] )
+            self.imapConnection.idle(callback=callback, timeout=self.monitoredFolder['idleTimeout'] * 60 )
 
             self.event.wait()
 
@@ -100,7 +78,9 @@ class Idler(object):
                 
     def doSync(self):
         logInfo( 'Syncing new messages' )
-        uidSearchStr = '(UNSEEN UID %s:*)' % (self.highestUid)
+        uidStr = self.highestUid.decode( 'utf-8' )
+        uidSearchStr = '(UNSEEN UID %s:*)' % (uidStr)
+        logInfo( uidSearchStr )
         (retcode, uids) = self.imapConnection.uid('search' , None, uidSearchStr )
         #print uids
         if retcode == 'OK':
@@ -111,8 +91,9 @@ class Idler(object):
                 
                 typ, headersData = self.imapConnection.uid('fetch', uid , '(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID SUBJECT FROM)])')
                 headers=headersData[0][1]
+                headersStr = headers.decode('utf-8')
                 parser = HeaderParser()
-                h = parser.parsestr(headers)
+                h = parser.parsestr(headersStr)
 
                 subject = h['Subject']
                 sender = h['From']
@@ -171,7 +152,7 @@ def logInfo( msg ):
     pass
 
     # Uncomment this line for some verbosity
-    #print ( str(datetime.datetime.now()) + ': ' + msg)
+    print ( str(datetime.datetime.now()) + ': ' + msg)
 
 
 def maintainIdle( monitoredFolder ):
