@@ -202,7 +202,6 @@ def main(argv):
             configFile = arg
           
     if configFile == '':
-        print( 'foo' )
         print( USAGE )
         sys.exit(1)
             
