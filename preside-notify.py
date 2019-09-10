@@ -8,14 +8,15 @@ import imaplib2
 import time, requests, email, urllib, datetime
 from email.parser import HeaderParser
 from threading import *
+import json5
+import sys
+import getopt
+import os
 
-import json
+Verbosity = 0
+USAGE = 'preside-notify.py [--help] [--verbose] --config=<file name>'
 
-global MonitoredFolders;
-with open('preside-config.json') as f:
-    MonitoredFolders = json.load(f)
 
- 
 # This is the threading object that does all the waiting on 
 # the event
 class Idler(object):
@@ -149,10 +150,8 @@ def doIdle( monitoredFolder ):
 
        
 def logInfo( msg ):
-    pass
-
-    # Uncomment this line for some verbosity
-    print ( str(datetime.datetime.now()) + ': ' + msg)
+    if Verbosity > 0:
+        print ( str(datetime.datetime.now()) + ': ' + msg)
 
 
 def maintainIdle( monitoredFolder ):
@@ -161,15 +160,65 @@ def maintainIdle( monitoredFolder ):
         doIdle( monitoredFolder ) 
 
 
-for monitoredFolder in MonitoredFolders:
-    t = Thread( target=maintainIdle, args=(monitoredFolder, ) )
-    t.start()                
+def runThreads(monitoredFolders):
+    for monitoredFolder in monitoredFolders:
+        t = Thread( target=maintainIdle, args=(monitoredFolder, ) )
+        t.start()
 
 
 # This doesn't work for some reason so just loop and sleep for a day at a time
 # sleep forever
 #time.sleep( sys.maxsize )
 #
-while True:
-    time.sleep( 86400 )
+    while True:
+        time.sleep( 86400 )
 
+
+
+def readJson(filename):
+    with open(filename) as f_in:
+        return(json5.load(f_in))
+                
+
+def main(argv):
+    global Verbosity
+    configFile = ''
+    
+    try: 
+        opts, args = getopt.getopt(argv, "h", ["help","verbose","config="])
+    except getopt.GetoptError:
+        print( USAGE )
+        sys.exit(2)
+      
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            print( USAGE )
+            sys.exit(0)
+          
+        elif opt in ("--verbose"):
+            Verbosity = 1
+          
+        elif opt in ("--config"):
+            configFile = arg
+          
+    if configFile == '':
+        print( 'foo' )
+        print( USAGE )
+        sys.exit(1)
+            
+    if os.path.exists( configFile ) == False:
+       print( 'Config file not found: ' + configFile  )
+       sys.exit(1)
+
+    cfgJson = readJson( configFile )
+    monitoredFolders = cfgJson[ 'MonitoredFolders' ]
+    if len( monitoredFolders ) == 0:
+      print( 'No folders to monitor speficied on config file')
+      sys.exit(1)
+
+    runThreads( monitoredFolders )
+        
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
