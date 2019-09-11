@@ -13,6 +13,8 @@ import json5
 import sys
 import getopt
 import os
+from email.header import Header, decode_header, make_header
+
 
 Verbosity = 0
 USAGE = 'preside-notify.py [--help] [--verbose] --config=<file name>'
@@ -86,8 +88,17 @@ class Idler(object):
     def parseHeadersResponse( self, headersResponse ):
         headersStr = headersResponse.decode('utf-8')
         parser = HeaderParser()
-        h = parser.parsestr(headersStr)
-        return( h )
+        headersDict = parser.parsestr(headersStr)
+        decodedHeadersDict = {}
+        for k, v in headersDict.items():
+            decodedHeadersDict[k.lower()] = str( make_header(decode_header(v)) )
+
+        return( decodedHeadersDict )
+
+    def stringFromDictForKey(self, dict, key ):
+        if key in dict:
+            return dict[key]
+        return ''
 
                 
     def doSync(self):
@@ -133,12 +144,12 @@ class Idler(object):
                     continue
             
             h = self.parseHeadersResponse( fetchResp[headersIndex][1] )
-            subject = h['Subject']
-            sender = h['From']
-            messageId = h['Message-ID']
+
+            subject = self.stringFromDictForKey( h, 'subject' )
+            sender = self.stringFromDictForKey( h, 'from' )
+            messageId = self.stringFromDictForKey( h, 'message-id' )
 
             alertMsg = 'PresideNotify.py - From: %s\nSubject: %s' % (sender,subject)
-
 
             qDict = {
                 'alertMsg' : alertMsg,
@@ -233,14 +244,15 @@ def main(argv):
     except getopt.GetoptError:
         print( USAGE )
         sys.exit(2)
-      
+
+    Verbosity = 0
     for opt, arg in opts:
         if opt in ('-h', '--help'):
             print( USAGE )
             sys.exit(0)
           
         elif opt in ("--verbose"):
-            Verbosity = 2
+            Verbosity += 1
           
         elif opt in ("--config"):
             configFile = arg

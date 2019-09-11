@@ -44,7 +44,7 @@ At this point, the script is ready to run. You can do that with a command like:
 
     python3 preside-notify.py --verbose --config=preside-notify.cfg
     
-The --verbose argument is optional. It is recommended that you include it in your initial testing, but that you eventually remove the argument to avoid excessive output.
+The --verbose argument is optional. It can be added a second time to increase the verbosity. It is recommended that you include it at least once in your initial testing, but that you eventually remove the argument to avoid excessive output.
 
 
 ### Limitations
