@@ -5,6 +5,7 @@
 
 
 import imaplib2
+import imaplib
 import time, requests, email, urllib, datetime
 from email.parser import HeaderParser
 from threading import *
@@ -60,68 +61,105 @@ class Idler(object):
                     self.event.set()
 
 
-            logInfo( 'Sending IDLE' )
+            try:
+                logInfo( 'Sending IDLE for ' + self.monitoredFolder["accountName"] )
             
-            self.imapConnection.idle(callback=callback, timeout=self.monitoredFolder['idleTimeout'] * 60 )
+                self.imapConnection.idle(callback=callback, timeout=self.monitoredFolder['idleTimeout'] * 60 )
 
-            self.event.wait()
+                self.event.wait()
 
-            logInfo( 'IDLE Completed' )
+                logInfo( 'IDLE Completed' )
 
-            if self.needIdle:
-                self.event.clear()
-                continue
+                if self.needIdle:
+                    self.event.clear()
+                    continue
             
-            if self.needsync:
-                self.event.clear()
-                self.doSync()
+                if self.needsync:
+                    self.event.clear()
+                    self.doSync()
+                    
+            except Exception as e:
+                logException( e )
+                time.sleep(4)
+
+                
+    def parseHeadersResponse( self, headersResponse ):
+        headersStr = headersResponse.decode('utf-8')
+        parser = HeaderParser()
+        h = parser.parsestr(headersStr)
+        return( h )
 
                 
     def doSync(self):
         logInfo( 'Syncing new messages' )
         uidStr = self.highestUid.decode( 'utf-8' )
         uidSearchStr = '(UNSEEN UID %s:*)' % (uidStr)
-        logInfo( uidSearchStr )
+        logImap( 'Sending -- ' + uidSearchStr )
         (retcode, uids) = self.imapConnection.uid('search' , None, uidSearchStr )
+        logImap( 'Received --  Type: ' + str( retcode ) + ' UIDS: ' + str (uids) )
         #print uids
-        if retcode == 'OK':
-            for uid in uids[0].split():
-                if uid <= self.highestUid:
-                    #print 'SKIPPING ' + uid
+        if retcode != 'OK':
+            logInfo( 'Search for unseen messages failed' )
+            return
+        
+        for uid in uids[0].split():
+            if uid <= self.highestUid:
+                #print 'SKIPPING ' + uid
+                continue
+
+
+            peekStr = '(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID SUBJECT FROM)])'
+            logImap( 'Sending -- ' + peekStr )
+
+            typ, fetchResp = self.imapConnection.uid('fetch', uid ,peekStr )
+            logImap( 'Received -- Type: ' + str( typ ) + ' Headers: ' + str (fetchResp) )
+
+            if typ != 'OK':
+                logInfo( "Bad response to fetch UID" )
+                continue
+
+            if len( fetchResp ) == 0:
+                logInfo( "Empty response to fetch UID" )
+                continue
+
+            headersIndex = 0 
+            firstResp = fetchResp[0]
+            if type( firstResp ) != tuple:
+                headersIndex = 1
+                flags = imaplib.ParseFlags( firstResp )
+                if b'\\Seen' in flags:
+                    h = self.parseHeadersResponse( fetchResp[headersIndex][1] )
+                    logInfo( 'Skipping seen email: ' + h['From'] )
                     continue
-                
-                typ, headersData = self.imapConnection.uid('fetch', uid , '(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID SUBJECT FROM)])')
-                headers=headersData[0][1]
-                headersStr = headers.decode('utf-8')
-                parser = HeaderParser()
-                h = parser.parsestr(headersStr)
+            
+            h = self.parseHeadersResponse( fetchResp[headersIndex][1] )
+            subject = h['Subject']
+            sender = h['From']
+            messageId = h['Message-ID']
 
-                subject = h['Subject']
-                sender = h['From']
-                alertMsg = 'PresideNotify.py - From: %s\nSubject: %s' % (sender,subject)
-                messageId = h['Message-ID']
+            alertMsg = 'PresideNotify.py - From: %s\nSubject: %s' % (sender,subject)
 
 
-                qDict = {
-                    'alertMsg' : alertMsg,
-                    'ghAccountName' : self.monitoredFolder['accountName'],
-                    'ghFolderPath' : self.monitoredFolder['folder'],
-                    'messageId' : messageId,
-                    'ghContentReady' : 1
+            qDict = {
+                'alertMsg' : alertMsg,
+                'ghAccountName' : self.monitoredFolder['accountName'],
+                'ghFolderPath' : self.monitoredFolder['folder'],
+                'messageId' : messageId,
+                'ghContentReady' : 1
                 }
 
-                qStr = urllib.parse.urlencode( qDict )
+            qStr = urllib.parse.urlencode( qDict )
                               
+            req = 'https://users.preside.io/preside/GHSendPushMsg?' + qStr
+            
+            logInfo( 'Sent notification: ' + req )
+            
+            r = requests.get(req, auth=(self.monitoredFolder['presideIoUser'], self.monitoredFolder['presideIoPassword']));
+            logInfo( 'Notification response: ' + str(r.headers) )
 
-                req = 'https://users.preside.io/preside/GHSendPushMsg?' + qStr
-                
-                logInfo( 'Sent notification: ' + req )
-
-                r = requests.get(req, auth=(self.monitoredFolder['presideIoUser'], self.monitoredFolder['presideIoPassword']));
-                logInfo( 'Notification response: ' + str(r.headers) )
 
 
-def doIdle( monitoredFolder ): 
+def spawnIdler( monitoredFolder ): 
     try:
         M = imaplib2.IMAP4_SSL( monitoredFolder['server'] ) ; 
         M.login(monitoredFolder['user'], monitoredFolder['password'] )
@@ -137,8 +175,8 @@ def doIdle( monitoredFolder ):
         #time.sleep(29*60)
         time.sleep(8*60*60)
 
-    except:
-        #print( str(e) )
+    except Exception as e:
+        logException( e )
         raise
 
     finally:
@@ -148,16 +186,22 @@ def doIdle( monitoredFolder ):
        M.logout()
        logInfo( 'Logged out' )
 
-       
+
+def logException( e ):
+    print ( str(datetime.datetime.now()) + ': ' + str(e) )
+  
 def logInfo( msg ):
     if Verbosity > 0:
         print ( str(datetime.datetime.now()) + ': ' + msg)
-
+       
+def logImap( msg ):
+    if Verbosity > 1:
+        logInfo( '[IMAP] ' + msg)
 
 def maintainIdle( monitoredFolder ):
     while True:
         logInfo( 'Running Idle for Account ' + monitoredFolder['accountName'] + ' and Folder: ' + monitoredFolder['folder'] )
-        doIdle( monitoredFolder ) 
+        spawnIdler( monitoredFolder ) 
 
 
 def runThreads(monitoredFolders):
@@ -196,7 +240,7 @@ def main(argv):
             sys.exit(0)
           
         elif opt in ("--verbose"):
-            Verbosity = 1
+            Verbosity = 2
           
         elif opt in ("--config"):
             configFile = arg
