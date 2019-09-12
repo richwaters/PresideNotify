@@ -103,27 +103,33 @@ class Idler(object):
                 
     def doSync(self):
         logInfo( 'Syncing new messages' )
-        uidStr = self.highestUid.decode( 'utf-8' )
+        #uidStr = self.highestUid.decode( 'utf-8' )
+        uidStr = self.highestUid + 1
         uidSearchStr = '(UNSEEN UID %s:*)' % (uidStr)
-        logImap( 'Sending -- ' + uidSearchStr )
+            
+        logImap( self.monitoredFolder,  'Sending -- ' + uidSearchStr )
         (retcode, uids) = self.imapConnection.uid('search' , None, uidSearchStr )
-        logImap( 'Received --  Type: ' + str( retcode ) + ' UIDS: ' + str (uids) )
+        logImap( self.monitoredFolder, 'Received --  Type: ' + str( retcode ) + ' UIDS: ' + str (uids) )
+
         #print uids
         if retcode != 'OK':
             logInfo( 'Search for unseen messages failed' )
             return
         
         for uid in uids[0].split():
-            if uid <= self.highestUid:
-                #print 'SKIPPING ' + uid
+            uidStr = uid.decode( 'utf-8' )
+            uidInt = int( uidStr )
+            if uidInt <= self.highestUid:
+                logInfo( 'SKIPPING UID: ' + uidStr )
                 continue
-
+            if self.highestUid == None or uidInt > self.highestUid:
+                self.highestUid = uidInt
 
             peekStr = '(BODY.PEEK[HEADER.FIELDS (MESSAGE-ID SUBJECT FROM)])'
-            logImap( 'Sending -- ' + peekStr )
+            logImap( self.monitoredFolder, 'Sending -- ' + peekStr )
 
             typ, fetchResp = self.imapConnection.uid('fetch', uid ,peekStr )
-            logImap( 'Received -- Type: ' + str( typ ) + ' Headers: ' + str (fetchResp) )
+            logImap( self.monitoredFolder, 'Received -- Type: ' + str( typ ) + ' Headers: ' + str (fetchResp) )
 
             if typ != 'OK':
                 logInfo( "Bad response to fetch UID" )
@@ -133,21 +139,29 @@ class Idler(object):
                 logInfo( "Empty response to fetch UID" )
                 continue
 
-            headersIndex = 0 
-            firstResp = fetchResp[0]
-            if type( firstResp ) != tuple:
-                headersIndex = 1
-                flags = imaplib.ParseFlags( firstResp )
+            headersIndex = 0
+            isSeen = False
+            resp = fetchResp[headersIndex]
+            while type( resp ) != tuple and headersIndex < len( fetchResp ):
+                headersIndex += 1
+                flags = imaplib.ParseFlags( resp )
                 if b'\\Seen' in flags:
-                    h = self.parseHeadersResponse( fetchResp[headersIndex][1] )
-                    logInfo( 'Skipping seen email: ' + h['From'] )
-                    continue
-            
-            h = self.parseHeadersResponse( fetchResp[headersIndex][1] )
+                    isSeen = True
+                resp = fetchResp[headersIndex]
 
-            subject = self.stringFromDictForKey( h, 'subject' )
-            sender = self.stringFromDictForKey( h, 'from' )
-            messageId = self.stringFromDictForKey( h, 'message-id' )
+            if headersIndex == len( fetchResp ) :
+                logInfo( 'Cannot get email headers' )
+                continue
+
+            parsedHeaders = self.parseHeadersResponse( fetchResp[headersIndex][1] )
+            subject = self.stringFromDictForKey( parsedHeaders, 'subject' )
+            sender = self.stringFromDictForKey( parsedHeaders, 'from' )
+            messageId = self.stringFromDictForKey( parsedHeaders, 'message-id' )
+
+            if isSeen:
+                logInfo( 'Skipping seen email: ' + subject )
+                continue
+            
 
             alertMsg = 'PresideNotify.py - From: %s\nSubject: %s' % (sender,subject)
 
@@ -170,15 +184,47 @@ class Idler(object):
 
 
 
-def spawnIdler( monitoredFolder ): 
+def spawnIdler( monitoredFolder ):
+    idler = None
+    M = None
+    
+    #logInfo( 'Connecting to Account:%s, Folder: %s ' % (monitoredFolder['accountName'], monitoredFolder['folder'] ) )
+
     try:
-        M = imaplib2.IMAP4_SSL( monitoredFolder['server'] ) ; 
+        M = imaplib2.IMAP4_SSL( monitoredFolder['server'] ) ;
+    except Exception as e:
+        logInfo( "Error connecting to Account: %s" % (monitoredFolder['accountName']) )
+        logException( e )
+        raise
+
+    try:
         M.login(monitoredFolder['user'], monitoredFolder['password'] )
-        
+    except Exception as e:
+        logInfo( "Error logging into Account: %s" % (monitoredFolder['accountName']) )
+        logException( e )
+        try:
+            M.close()
+        except:
+            pass
+        raise e
+    
+    try:
+        highestUid = 0
+
+        logImap( monitoredFolder, 'Sending --  SELECT ' + monitoredFolder['folder'] )
         selectResponse = M.select( monitoredFolder['folder'] )
-        highestSeq = selectResponse[1][0]
-        uidResponse = M.fetch( highestSeq, "UID" )
-        highestUid = uidResponse[1][0].split()[-1][:-1]
+        logImap( monitoredFolder, 'Received --  ' + str( selectResponse ) )
+
+        (typ, resp) = selectResponse
+        if typ != "OK":
+            logInfo( "Bad select" )
+            raise
+             
+
+        highestSeq = resp[0]
+        if highestSeq != b'0':
+            uidResponse = M.fetch( highestSeq, "UID" )
+            highestUid = int( uidResponse[1][0].split()[-1][:-1].decode( 'utf-8' ) )
 
         # Start the Idler thread
         idler = Idler(M, monitoredFolder, highestUid)
@@ -187,27 +233,36 @@ def spawnIdler( monitoredFolder ):
         time.sleep(8*60*60)
 
     except Exception as e:
+        logInfo( 'Error setting up IDLE for Account:%s, Folder: %s ' % (monitoredFolder['accountName'], monitoredFolder['folder'] ) )
         logException( e )
         raise
 
     finally:
-       idler.stop()
-       idler.join()
-       M.close()
-       M.logout()
-       logInfo( 'Logged out' )
+        try:
+            if idler != None:
+                idler.stop()
+                idler.join()
+
+            if M != None:    
+                M.close()
+                M.logout()
+                
+            logInfo( 'Logged out' )
+        except:
+             pass
 
 
 def logException( e ):
     print ( str(datetime.datetime.now()) + ': ' + str(e) )
+    print(sys.exc_info()[0])
   
 def logInfo( msg ):
     if Verbosity > 0:
         print ( str(datetime.datetime.now()) + ': ' + msg)
        
-def logImap( msg ):
+def logImap( monitoredFolder, msg ):
     if Verbosity > 1:
-        logInfo( '[IMAP] ' + msg)
+        logInfo( '[IMAP-%s] %s' %(monitoredFolder['accountName'], msg ) )
 
 def maintainIdle( monitoredFolder ):
     while True:
