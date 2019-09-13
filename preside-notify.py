@@ -140,13 +140,15 @@ class Idler(object):
                 continue
 
             headersIndex = 0
-            isSeen = False
+            #isSeen = False
             resp = fetchResp[headersIndex]
             while type( resp ) != tuple and headersIndex < len( fetchResp ):
                 headersIndex += 1
-                flags = imaplib.ParseFlags( resp )
-                if b'\\Seen' in flags:
-                    isSeen = True
+
+                #This isn't right. These FLAGS that are being received are  coming through from the SELECT commands and aren't related to the BODY.PEEK or the uid being requested. I'm still not certain why they're arriving here, but they should just be ignored.
+                #flags = imaplib.ParseFlags( resp )
+                #if b'\\Seen' in flags:
+                #    isSeen = True
                 resp = fetchResp[headersIndex]
 
             if headersIndex == len( fetchResp ) :
@@ -158,9 +160,9 @@ class Idler(object):
             sender = self.stringFromDictForKey( parsedHeaders, 'from' )
             messageId = self.stringFromDictForKey( parsedHeaders, 'message-id' )
 
-            if isSeen:
-                logInfo( 'Skipping seen email: ' + subject )
-                continue
+            #if isSeen:
+            #    logInfo( 'Skipping seen email: ' + subject )
+            #    continue
             
 
             alertMsg = 'PresideNotify.py - From: %s\nSubject: %s' % (sender,subject)
@@ -172,6 +174,8 @@ class Idler(object):
                 'messageId' : messageId,
                 'ghContentReady' : 1
                 }
+
+            
 
             qStr = urllib.parse.urlencode( qDict )
                               
