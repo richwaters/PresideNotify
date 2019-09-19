@@ -44,7 +44,7 @@ At this point, the script is ready to run. You can do that with a command like:
 
     python3 preside-notify.py --verbose --config=preside-notify.cfg
     
-The --verbose argument is optional. It can be added a second time to increase the verbosity. It is recommended that you include it at least once in your initial testing, but that you eventually remove the argument to avoid excessive output.
+The --verbose argument is optional. It can be added multiple times to increase the verbosity. It is recommended that you include it once in your initial testing, but that you eventually remove the argument to avoid excessive output.
 
 
 ### Limitations
@@ -65,7 +65,8 @@ This section documents the configuration file used by the python script configur
   - *accountName* - This is the name of the account as it appears in Preside. 
   - *presideIoUser* - This is the email address you chose as your login id when you registered for your Preside.io account
   - *presideIoPassword* - This is your Preside.io password
-  - *idleTimeout* - This is the time in minutes the script will 'IDLE" while waiting for new emails. It should almost never be changed from 29. Learn about IMAP IDLE if you do want to change this.
+  - *idleTimeout* - This is the time in minutes the script will 'IDLE" while waiting for new emails. Usually, this shouldn't be changed from 29 if you're internet connection is always on. If you sometimes lose connectivity, the value can be reduced in order to recover from those losses quicker. If you're running on a laptop that likes to sleep its network connection for example, you might want to set this to 15 or even 5 so that notifications will be sent quicker when the device wakes. You shouldn't make the value greater than 29 unless you are familiar with IMAP IDLE and you have configured your server appropriately. 
+  - *enableEmailActions* - Set this to true if you'd like to allow actions (as defined in the Notification Actions screen in the app) to be performed on the email. **Please note** that these actions will only work if the app has actually had time to sync the email. Otherwise, the action will fail silently.
   
 <br/>
 
@@ -89,8 +90,10 @@ This section documents the URL paramateters that can be passed to Preside.io to 
     GHSound_Forest.mp3          
     GHSound_LaserShot.mp3        
     GHSound_LuneCalls.mp3  
-- *dontWakeApp* - This will deliver the notification without waking the app to perform a background refresh.
-- *ghContentReady* - This can be set to 1 to tell the app to wake up and sync emails in order that it has the email loaded when a notification is tapped. The 'dontWakeApp' parameter will be ignored if 'ghContentReady' is set to 1.
+    
+- *dontWakeApp* - This will deliver the notification without waking the app to perform a background refresh. The 'dontWakeApp' parameter will be ignored if 'ghContentReady' is true or if 'ghEnableEmailActions' is true.
+
+- *ghContentReady* - This can be set to 1 to tell the app to wake up and sync emails in order that it has the email loaded when a notification is tapped. 
 
     The following parameters are only used if 'ghContentReady' is set to 1. They are useful in helping the app know what should be synced in order to download the email.
     - *ghAccountName* -  This specifies the account in which the email was received.
@@ -99,6 +102,8 @@ This section documents the URL paramateters that can be passed to Preside.io to 
     - *accountInfoHash* - This is an alternate means of specifying the account .The value can be obtained from the app, but this should generally not be used.
 
 - *deviceId* - This can be used to send the notification to a specific device. The value can be obtained from the app, but this should generally not be used.
+
+- *ghEnableEmailActions* - Setting this to true or 1 allows notification actions to be performed on the email in the notification. When invoked, the action will only work if the app has actually had time to sync the email. Otherwise, the action will fail silently.
 
 
 
