@@ -295,11 +295,16 @@ def connectAndIdle( monitoredFolder,highestUid):
 def logException( e ):
     print ( str(datetime.datetime.now()) + ': ' + str(e) )
     print(sys.exc_info()[0])
-  
+
+def logMessage( monitoredFolder, msg ):
+    accountName = monitoredFolder.get( 'accountName', '[Unknown]' )
+    folderName = monitoredFolder.get( 'folder' , '[Unknown]' )
+    accountAndFolder =  'Account ' + accountName + ', Folder: ' + folderName
+    print ( '[%s] %s: %s' % ( accountAndFolder,  str(datetime.datetime.now()) , msg) )
+    
 def logInfo( monitoredFolder, msg ):
     if Verbosity > 0:
-        accountAndFolder =  'Account ' + monitoredFolder['accountName'] + ', Folder: ' + monitoredFolder['folder']
-        print ( '[%s] %s: %s' % ( accountAndFolder,  str(datetime.datetime.now()) , msg) )
+        logMessage( monitoredFolder, msg )
        
 def logImap( monitoredFolder, msg ):
     if Verbosity > 1:
@@ -350,6 +355,21 @@ def readJson(filename):
         logException( e )
         sys.exit(1)
 
+
+def validateMonitoredFolders( monitoredFolders ):
+    hasError = False
+    requiredKeys = ['user', 'password', 'server', 'folder', 'accountName', 'presideIoUser', 'presideIoPassword', 'idleTimeout'  ]
+    for monitoredFolder in monitoredFolders:
+        #logInfo( monitoredFolder, 'Validating configuration' )
+        for k in requiredKeys:
+            if  k not in monitoredFolder:
+                logMessage( monitoredFolder, 'Missing configuration key: ' + k )
+                hasError = True
+                        
+    if hasError:
+        sys.exit(1)
+
+    
 def main(argv):
     global Verbosity
     configFile = ''
@@ -386,6 +406,7 @@ def main(argv):
       print( 'No folders to monitor speficied on config file')
       sys.exit(1)
 
+    validateMonitoredFolders( monitoredFolders )
     runThreads( monitoredFolders )
         
 
