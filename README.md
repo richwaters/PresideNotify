@@ -65,8 +65,16 @@ This section documents the configuration file used by the python script configur
   - *accountName* - This is the name of the account as it appears in Preside. 
   - *presideIoUser* - This is the email address you chose as your login id when you registered for your Preside.io account
   - *presideIoPassword* - This is your Preside.io password
-  - *idleTimeout* - This is the time in minutes the script will 'IDLE" while waiting for new emails. Usually, this shouldn't be changed from 29 if you're internet connection is always on. If you sometimes lose connectivity, the value can be reduced in order to recover from those losses quicker. If you're running on a laptop that likes to sleep its network connection for example, you might want to set this to 15 or even 5 so that notifications will be sent quicker when the device wakes. You shouldn't make the value greater than 29 unless you are familiar with IMAP IDLE and you have configured your server appropriately. 
-  - *enableEmailActions* - Set this to true if you'd like to allow actions (as defined in the Notification Actions screen in the app) to be performed on the email. **Please note** that these actions will only work if the app has actually had time to sync the email. Otherwise, the action will fail silently.
+  - *idleTimeout* - This is the time in minutes the script will 'IDLE" while waiting for new emails. Usually, this shouldn't be changed from 29 if your internet connection is always on. If you sometimes lose connectivity, the value can be reduced in order to recover from those losses quicker. If you're running on a laptop that likes to sleep its network connection for example, you might want to set this to 15 or even 5 so that notifications will be sent quicker when the device wakes. You shouldn't make the value greater than 29 unless you are familiar with IMAP IDLE and you have configured your server appropriately. 
+  
+  
+  - *enableEmailActions* (optional) - Set this to true if you'd like to allow actions (as defined in the Notification Actions screen in the app) to be performed on the email. **Please note** that these actions will only work if the app has actually had time to sync the email. Otherwise, the action will fail silently.
+
+  - *disableAlertMessage* (optional) - Set this to true if you don't want the text alert when you receive an email. Use this if you only want a sound notification or if you'd like the script to wake the app on your device when new mail arrives and let it issue the notifications. In that case, you should also set the "Remote Notifications Manager" in the Syncing preferences of the app to  "App". The advantage of this approach is that you can then make use of the 'Notification Rules' feature of the app and the email for the notification is guaranteed to be synced to the app before the notification is issued. The downside of this approach is that some notifications might be delayed.
+  
+   - *alertSound* (optional) - Use this to include a sound with the notification. The available sounds are listed in the URL References section of this document. 
+   
+   - *alertPrefix* (optional) - Use this to include some text before the beginning of the alert message. For example, it can be useful to use the account name here to indicate which account the email came in on. Or, you might include the name of the script to remind you of what is generating the notification.X Include a newline in this string to place this prefix on a separate line.
   
 <br/>
 

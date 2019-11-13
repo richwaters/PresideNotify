@@ -31,6 +31,8 @@ class Idler(object):
         self.monitoredFolder = monitoredFolder
  
     def idle(self):
+        monitoredFolder = self.monitoredFolder
+        
         # Starting an unending loop here
         while True:
             if self.event.isSet():
@@ -42,9 +44,9 @@ class Idler(object):
             
             def callback(args):
                 (response, userArg, aborted) = args
-                logInfo( 'IDLE Callback ' + str( response) )
+                logInfo( monitoredFolder,  'IDLE Callback ' + str( response) )
                 if aborted:
-                    logInfo( "IDLE aborted (probably lost connection)" )
+                    logInfo(monitoredFolder, "IDLE aborted (probably lost connection)" )
                     self.needAbort = True
                     self.event.set()
                     return
@@ -52,7 +54,7 @@ class Idler(object):
 
                 if not self.event.isSet():
                     idleResponse = self.imapConnection.response( 'IDLE' )
-                    logInfo( str(idleResponse) )
+                    logInfo(monitoredFolder,  'IDLE response ' + str(idleResponse) )
         
                     if idleResponse[1][0] == 'TIMEOUT':
                         self.needIdle = True
@@ -61,17 +63,17 @@ class Idler(object):
                     self.event.set()
                 else:
                     #idleResponse = self.imapConnection.response( 'IDLE' )
-                    logInfo( "Response received with event already set " ) 
+                    logInfo(monitoredFolder,  "Response received with event already set " ) 
 
 
             try:
                 timeout = self.monitoredFolder['idleTimeout'] * 60
-                logInfo( 'Sending IDLE for ' + self.monitoredFolder["accountName"] + " timeout " + str( timeout ) )
+                logInfo( monitoredFolder, 'Sending IDLE with timeout ' + str( timeout ) )
             
                 self.imapConnection.idle(callback=callback, timeout=timeout)
                 self.event.wait()
 
-                logInfo( 'IDLE Completed' )
+                logInfo( monitoredFolder, 'IDLE Completed' )
 
                 if self.needAbort:
                     self.event.clear()
@@ -123,7 +125,7 @@ def parseHeadersResponse( headersResponse ):
 
 
 def syncMonitoredFolder( monitoredFolder, imapConnection, highestUid ):
-    logInfo( 'Syncing new messages' )
+    logInfo( monitoredFolder, 'Syncing new messages' )
     #uidStr = self.highestUid.decode( 'utf-8' )
     uidStr = highestUid + 1
     uidSearchStr = '(UNSEEN UID %s:*)' % (uidStr)
@@ -134,14 +136,14 @@ def syncMonitoredFolder( monitoredFolder, imapConnection, highestUid ):
 
     #print uids
     if retcode != 'OK':
-        logInfo( 'Search for unseen messages failed' )
+        logInfo( monitoredFolder, 'Search for unseen messages failed' )
         return highestUid
     
     for uid in uids[0].split():
         uidStr = uid.decode( 'utf-8' )
         uidInt = int( uidStr )
         if uidInt <= highestUid:
-            logInfo( 'SKIPPING UID: ' + uidStr )
+            logInfo( monitoredFolder, 'SKIPPING UID: ' + uidStr )
             continue
 
         if highestUid == None or uidInt > highestUid:
@@ -154,11 +156,11 @@ def syncMonitoredFolder( monitoredFolder, imapConnection, highestUid ):
         logImap( monitoredFolder, 'Received -- Type: ' + str( typ ) + ' Headers: ' + str (fetchResp) )
 
         if typ != 'OK':
-            logInfo( "Bad response to fetch UID" )
+            logInfo( monitoredFolder, "Bad response to fetch UID" )
             continue
 
         if len( fetchResp ) == 0:
-            logInfo( "Empty response to fetch UID" )
+            logInfo( monitoredFolder, "Empty response to fetch UID" )
             continue
 
         headersIndex = 0
@@ -174,7 +176,7 @@ def syncMonitoredFolder( monitoredFolder, imapConnection, highestUid ):
             resp = fetchResp[headersIndex]
 
         if headersIndex == len( fetchResp ) :
-            logInfo( 'Cannot get email headers' )
+            logInfo( monitoredFolder, 'Cannot get email headers' )
             continue
 
         parsedHeaders = parseHeadersResponse( fetchResp[headersIndex][1] )
@@ -183,16 +185,15 @@ def syncMonitoredFolder( monitoredFolder, imapConnection, highestUid ):
         messageId = stringFromDictForKey( parsedHeaders, 'message-id' )
         
         enableEmailActions = boolFromDictForKey( monitoredFolder, 'enableEmailActions' )
+        disableAlerts =  boolFromDictForKey( monitoredFolder, 'disableAlertMessage' )
+        soundName =  stringFromDictForKey( monitoredFolder, 'alertSound' )
 
         #if isSeen:
-        #    logInfo( 'Skipping seen email: ' + subject )
+        #    logInfo( monitoredFolder, 'Skipping seen email: ' + subject )
         #    continue
 
 
-        alertMsg = 'PresideNotify.py - From: %s\nSubject: %s' % (sender,subject)
-
         qDict = {
-            'alertMsg' : alertMsg,
             'ghAccountName' : monitoredFolder['accountName'],
             'ghFolderPath' : monitoredFolder['folder'],
             'messageId' : messageId,
@@ -200,16 +201,22 @@ def syncMonitoredFolder( monitoredFolder, imapConnection, highestUid ):
             'ghEnableEmailActions' : enableEmailActions
             }
 
+        if not disableAlerts:
+            alertPfx = stringFromDictForKey( monitoredFolder, 'alertPrefix' )
+            alertMsg = '%sFrom: %s\nSubject: %s' % (alertPfx,sender,subject)
+            qDict['alertMsg'] = alertMsg
 
+        if len(soundName):
+            qDict['alertSound'] = soundName
 
         qStr = urllib.parse.urlencode( qDict )
 
         req = 'https://users.preside.io/preside/GHSendPushMsg?' + qStr
 
-        logInfo( 'Sent notification: ' + req )
+        logInfo( monitoredFolder, 'Sent notification: ' + req )
 
         r = requests.get(req, auth=( monitoredFolder['presideIoUser'], monitoredFolder['presideIoPassword']));
-        logInfo( 'Notification response: ' + str(r.headers) )
+        logInfo( monitoredFolder, 'Notification response: ' + str(r.headers) )
 
     return highestUid
 
@@ -218,19 +225,19 @@ def connectAndIdle( monitoredFolder,highestUid):
     idler = None
     M = None
     
-    #logInfo( 'Connecting to Account:%s, Folder: %s ' % (monitoredFolder['accountName'], monitoredFolder['folder'] ) )
+    #logInfo( monitoredFolder, 'Connecting' )
     imaplib2DebugLevel = max( Verbosity - 2, 0 )
     try:
         M = imaplib2.IMAP4_SSL( host=monitoredFolder['server'], debug=imaplib2DebugLevel ) ;
     except Exception as e:
-        logInfo( "Error connecting to Account: %s" % (monitoredFolder['accountName']) )
+        logInfo( monitoredFolder, "ERROR connecting" )
         logException( e )
         return highestUid
 
     try:
         M.login(monitoredFolder['user'], monitoredFolder['password'] )
     except Exception as e:
-        logInfo( "Error logging into Account: %s" % (monitoredFolder['accountName']) )
+        logInfo( monitoredFolder, "ERROR logging in" )
         logException( e )
         try:
             M.close()
@@ -246,7 +253,7 @@ def connectAndIdle( monitoredFolder,highestUid):
 
         (typ, resp) = selectResponse
         if typ != "OK":
-            logInfo( "Bad select" )
+            logInfo(monitoredFolder,  "Bad select" )
             return highestUid
              
 
@@ -262,11 +269,11 @@ def connectAndIdle( monitoredFolder,highestUid):
             executor.submit( idler.idle() )
             highestUid = idler.highestUid
 
-        logInfo( "idle Done" )
+        logInfo( monitoredFolder, "IDLE Done" )
         return highestUid
         
     except Exception as e:
-        logInfo( 'Error setting up IDLE for Account:%s, Folder: %s ' % (monitoredFolder['accountName'], monitoredFolder['folder'] ) )
+        logInfo( monitoredFolder, 'ERROR setting up IDLE' )
         logException( e )
         return highestUid
 
@@ -280,7 +287,7 @@ def connectAndIdle( monitoredFolder,highestUid):
                 M.close()
                 M.logout()
                 
-            logInfo( 'Logged out' )
+            logInfo( monitoredFolder, 'Logged out' )
         except:
              pass
 
@@ -289,13 +296,14 @@ def logException( e ):
     print ( str(datetime.datetime.now()) + ': ' + str(e) )
     print(sys.exc_info()[0])
   
-def logInfo( msg ):
+def logInfo( monitoredFolder, msg ):
     if Verbosity > 0:
-        print ( str(datetime.datetime.now()) + ': ' + msg)
+        accountAndFolder =  'Account ' + monitoredFolder['accountName'] + ', Folder: ' + monitoredFolder['folder']
+        print ( '[%s] %s: %s' % ( accountAndFolder,  str(datetime.datetime.now()) , msg) )
        
 def logImap( monitoredFolder, msg ):
     if Verbosity > 1:
-        logInfo( '[IMAP-%s] %s' %(monitoredFolder['accountName'], msg ) )
+        logInfo( monitoredFolder, '[IMAP] %s' % (msg) )
 
 def maintainIdle( monitoredFolder ):
     accountAndFolder =  'Account ' + monitoredFolder['accountName'] + ', Folder: ' + monitoredFolder['folder']
@@ -303,7 +311,7 @@ def maintainIdle( monitoredFolder ):
     highestUid = 0
     idleTimeoutSeconds = (monitoredFolder['idleTimeout'] * 60)
     while True:
-        logInfo( '[%s] Running Idle with startUid: %s' % (accountAndFolder, str(highestUid)) )
+        logInfo( monitoredFolder, 'Running Idle' )
         try:
             idleStartTime = time.time()
             highestUid = connectAndIdle( monitoredFolder, highestUid )
@@ -321,7 +329,7 @@ def maintainIdle( monitoredFolder ):
             sleepTime = min( sleepTime * 2, 300, idleTimeoutSeconds )
 
         #connectAndIdle should never exit. If we're here, there's been and error. Sleep for a bit
-        logInfo ('[%s] Waiting %s secs before trying again' % (accountAndFolder,str(sleepTime)) )
+        logInfo (monitoredFolder, 'Waiting %s secs before trying again' % (str(sleepTime)) )
         time.sleep(sleepTime)
 
             
@@ -332,9 +340,15 @@ def runThreads(monitoredFolders):
             executor.submit( maintainIdle, monitoredFolder )                               
 
 def readJson(filename):
-    with open(filename) as f_in:
-        return(json5.load(f_in))
-                
+    try:
+        with open(filename) as f_in:
+            return(json5.load(f_in))
+
+    except Exception as e:
+        print( "\n***** ERROR loading config file. Check for missing commas and other syntax errors.\n" )
+        #shouldn't ever get here, in theory
+        logException( e )
+        sys.exit(1)
 
 def main(argv):
     global Verbosity
