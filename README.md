@@ -2,7 +2,7 @@
 PresideNotify is of tools for monitoring email Inboxes and/or folders and sending notifications to the Preside iPhone app when new emails arrive.  
 
 
-<br/>
+<br />
       
 ## Prerequisites
 Before using these monitoring tools, you should go to the More > Syncing screen in Preside and set the 'Background Sync' type to "Remote (private computer)". That should lead you through a process whereby you register for a Preside.io account if you don't already have one. You should also enable the 'New email notification' option on that same 'Syncing & Notifications' screen. That should obtain permission from iOS to issue notifications. Finally, on that screen, scroll down a little to the 'Remote notifications' section and set the 'Manager' option to 'Remote'.
@@ -14,7 +14,7 @@ To check to make sure you have everything setup properly, open the terminal app 
 That should cause a notification to appear on your device.             
 
     
-<br /> <br />
+<br />
     
 
 ## Mac Mail (Applescript) monitoring
@@ -30,7 +30,7 @@ After saving the rule, make sure that it is 'checked' in the list of rules.
 
 That's it. You should now be notified whenever a new message is received and the Mac Mail app is running.
 
-<br /> <br />
+<br />
 
 
 ## MailMate  monitoring
@@ -56,7 +56,7 @@ Once that's all been done, restart MailMate. Next, select an email and click on 
 
 Next, go to the Sources list in the left sidebar of MailMate. For each source you'd like to issue notifications from, control-click and choose "Edit rules ...". Select "Rules" from the top bar on that window, and then tap the + button to add a new rule. [This screenshot](PresideMailMateRuleScreenshot.png) shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
 
-<br /> <br />    
+<br />
     
 ## Python Monitoring
 
@@ -74,15 +74,13 @@ At this point, the script is ready to run. You can do that with a command like:
     
 The --verbose argument is optional. It can be added multiple times to increase the verbosity. It is recommended that you include it once in your initial testing, but that you eventually remove the argument to avoid excessive output.
 
-<br /> <br />
-
 
 ### Limitations
 - The python option only works with IMAP accounts
 - Also, it won't work with accounts that require OAuth authentication. You might be able to work around that issue by creating an app-specific password.
 
 
-<br /> <br />
+<br />
 
 ## MacOS
 The python script is known to work with the python3 managed by the brew installer.
@@ -90,7 +88,7 @@ The python script is known to work with the python3 managed by the brew installe
 
 
 
-<br/>
+<br />
 
 ## Config File Reference
 This section documents the configuration file used by the python script configuration file. 
