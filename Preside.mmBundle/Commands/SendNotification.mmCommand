@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>environment</key>
+	<string>MM_SUBJECT=${subject}\nMM_MESSAGE_ID=${message-id.split}\nMM_FROM_NAME=${from.name}\nMM_FROM_ADDRESS=${from.address}\nMM_ACCOUNT=${#source.#name}\nMM_FOLDERPATH=${#source.path}\n</string>
+	<key>name</key>
+	<string>SendNotification</string>
+	<key>uuid</key>
+	<string>0DAD2D9F-7703-4F69-80BF-770AE4BB9C63</string>
+	<key>input</key>
+	<string>canonical</string>
+	<key>command</key>
+	<string>#!/bin/bash
+&quot;${MM_BUNDLE_SUPPORT}/bin/preside_notify.sh&quot;</string>
+</dict>
+</plist>

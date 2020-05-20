@@ -6,7 +6,11 @@
 
 import imaplib2
 import imaplib
-import time, requests, email, urllib, datetime
+import time 
+import requests 
+import email
+import urllib 
+import datetime
 from email.parser import HeaderParser
 from threading import *
 import json5
