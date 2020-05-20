@@ -13,10 +13,10 @@ To check to make sure you have everything setup properly, open the terminal app 
 
 That should cause a notification to appear on your device.             
 
+    
+    
 
-<br/>
-
-## Applescript monitoring
+## Mac Mail (Applescript) monitoring
 The Applescript option uses the Mac Mail app to monitor for new emails. You'll need to leave that app always running for the notifications to be delivered. The way this works is that a 'rule' is setup in Mac Mail app that runs the applescript whenever a new mail is received. 
 
 To make use of this tool, start by downloading the PresideNotify.applescript file. Then double click on the file to open it in the Applescript Editor. Next, edit the 'set ghUser to ""' line and insert your own Preside.io user name between the "".  Then, edit the 'set ghPassword to ""' line and insert your Preside.io password in between the "". Exit the Applescript Editor and move the script into the ~/Library/Application\ Scripts/com.apple.mail folder.
@@ -29,16 +29,45 @@ After saving the rule, make sure that it is 'checked' in the list of rules.
 
 That's it. You should now be notified whenever a new message is received and the Mac Mail app is running.
 
-<br/>
+    
+    
 
 
+## MailMate  monitoring
+The MailMate option works much like the Applescript one, in that it uses rules in the MacOS app to send the notifications to Preside on your device. As with the Mac Mail approach, you'll need to make use of a MailMate rules, and you'll need to leave that app always running. To install the Preside bundle, copy Preside.mmBundle to the Library/Application\ Support/MailMate/Bundles directory under your home directory. Then run the preside_notify.sh script with a --setup argument in order to place your Preside.io credentials into the keychain.
+
+This set of shell commands (or something similar) run from a terminal should get things installed:
+
+TOPINSTALLDIR="${HOME}";  
+pushd ${TOPINSTALLDIR};  
+git clone https://github.com/richwaters/PresideNotify;  
+BUNDLESDIR="${HOME}/Library/Application Support/MailMate/Bundles";  
+mkdir -p ${BUNDLESDIR};  
+cd ${BUNDLESDIR};  
+ln -s ${TOPINSTALLDIR}/PresideNotify/Preside.mmBundle Preside.mmBundle;  
+popd;  
+  
+Then, configure the script with your credentials with this command:
+
+
+${HOME}/Library/Application\ Support/MailMate/Bundles/Preside.mmBundle/Support/bin/preside_notify.sh --setup
+
+Once that's all been done, restart MailMate. Next, select an email and click on "Command" in the Menu Bar and you should see Preside as an option. Click on that and select "SendNotification". If things are working, that should send a notification to your device.
+
+Next, go to the Sources list in the left sidebar of MailMate. For each source you'd like to issue notifications from, control-click and choose "Edit rules ...". Select "Rules" from the top bar on that window, and then tap the + button to add a new rule. [This screenshot](PresideMailMateRuleScreenshot.png) shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
+
+    
+    
+    
 ## Python Monitoring
 
 The python monitoring option is slightly more advanced, in that it can be run as a daemon and/or on a server. The script is a python3 script. As such you should either specify python3 on the command line or with the #! at the top of the script or make sure that python3 is the default python version for your environment. To set it up, download the preside-notify.py script and the preside-notify.cfg file. Then, edit the preside-notify.cfg file and fill in the appropriate values for the 'MonitoredFolders' variable. Also, the script uses some packages you'll need to install:
 
 sudo pip3 install requests  
-sudo pip3 install imaplib2  
 sudo pip3 install json5  
+
+You'll also need the imaplib2 library. Unfortunately, the version in the repository used by pip3 is an older version that does not work. As such, you should install the imaplib2 python module from this github repo https://github.com/imaplib2/imaplib2   If you run into problems with the setup, you can just copy the imaplib2.py file into the same directory you've installed the preside-notify.py script in, and it 'should' pick up that one. Also, it might be useful to uninstall any older version of the imaplib2 library with something like: sudo pip3 uninstall imaplib2
+
 
 At this point, the script is ready to run. You can do that with a command like:
 
@@ -50,6 +79,13 @@ The --verbose argument is optional. It can be added multiple times to increase t
 ### Limitations
 - The python option only works with IMAP accounts
 - Also, it won't work with accounts that require OAuth authentication. You might be able to work around that issue by creating an app-specific password.
+
+
+### MacOS
+The python script is known to work with the python3 managed by the brew installer.
+
+
+
 
 <br/>
 
