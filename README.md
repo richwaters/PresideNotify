@@ -56,6 +56,8 @@ Once that's all been done, restart MailMate. Next, select an email and click on 
 
 Next, go to the Sources list in the left sidebar of MailMate. For each source you'd like to issue notifications from, control-click and choose "Edit rules ...". Select "Rules" from the top bar on that window, and then tap the + button to add a new rule. [This screenshot](PresideMailMateRuleScreenshot.png) shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
 
+Finally, things will work better if the name of each Source in MailMate matches the 'Nickname' of the corresponding account in Preside. You can change the name of the mail source in MailMate by right/ctrl-clicking on the source and choosing "Rename Source ...". Or, you can change the nickname in Preside by navigating to the account from the More > Accounts screen.
+
 <br />
     
 ## Python Monitoring
@@ -83,8 +85,9 @@ The --verbose argument is optional. It can be added multiple times to increase t
 <br />
 
 ## MacOS
-The python script is known to work with the python3 managed by the brew installer.
+- Running python3 on MacOs can be somewhat confusing. Using 'homebrew' to manage the python installation and environment is often the best option. 
 
+- It is unclear whether any of these solutions work when the computer goes to sleep and/or how to ensure that they do. If you have some insight about that, please send an email to info@preside.io with those insights.
 
 
 
