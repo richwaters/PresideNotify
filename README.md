@@ -14,6 +14,7 @@ To check to make sure you have everything setup properly, open the terminal app 
 That should cause a notification to appear on your device.             
 
     
+<br /> <br />
     
 
 ## Mac Mail (Applescript) monitoring
@@ -29,8 +30,7 @@ After saving the rule, make sure that it is 'checked' in the list of rules.
 
 That's it. You should now be notified whenever a new message is received and the Mac Mail app is running.
 
-    
-    
+<br /> <br />
 
 
 ## MailMate  monitoring
@@ -56,8 +56,7 @@ Once that's all been done, restart MailMate. Next, select an email and click on 
 
 Next, go to the Sources list in the left sidebar of MailMate. For each source you'd like to issue notifications from, control-click and choose "Edit rules ...". Select "Rules" from the top bar on that window, and then tap the + button to add a new rule. [This screenshot](PresideMailMateRuleScreenshot.png) shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
 
-    
-    
+<br /> <br />    
     
 ## Python Monitoring
 
@@ -75,13 +74,17 @@ At this point, the script is ready to run. You can do that with a command like:
     
 The --verbose argument is optional. It can be added multiple times to increase the verbosity. It is recommended that you include it once in your initial testing, but that you eventually remove the argument to avoid excessive output.
 
+<br /> <br />
+
 
 ### Limitations
 - The python option only works with IMAP accounts
 - Also, it won't work with accounts that require OAuth authentication. You might be able to work around that issue by creating an app-specific password.
 
 
-### MacOS
+<br /> <br />
+
+## MacOS
 The python script is known to work with the python3 managed by the brew installer.
 
 
