@@ -56,7 +56,7 @@ Once that's all been done, restart MailMate. Next, select an email and click on 
 
 Next, go to the Sources list in the left sidebar of MailMate. For each source you'd like to issue notifications from, control-click and choose "Edit rules ...". Select "Rules" from the top bar on that window, and then tap the + button to add a new rule. [This screenshot](PresideMailMateRuleScreenshot.png) shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
 
-Finally, things will work better if the name of each Source in MailMate matches the 'Nickname' of the corresponding account in Preside. You can change the name of the mail source in MailMate by right/ctrl-clicking on the source and choosing "Rename Source ...". Or, you can change the nickname in Preside by navigating to the account from the More > Accounts screen.
+Finally, things will work better if the name of each Source in MailMate matches the 'Nickname' of the corresponding account in Preside. You can change the name of the mail source in MailMate by right/ctrl-clicking on the source and choosing "Rename Source ...". Or, you can change the nickname in Preside by navigating to the account from the More > Accounts screen, changing the Nickname, and Tapping Save.
 
 <br />
     
