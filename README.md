@@ -1,5 +1,5 @@
 # PresideNotify
-PresideNotify is of tools for monitoring email Inboxes and/or folders and sending notifications to the Preside iPhone app when new emails arrive.  
+PresideNotify is a set of tools for monitoring email Inboxes and/or folders and sending notifications to the Preside iPhone app when new emails arrive.  
 
 
 <br />
