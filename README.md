@@ -138,6 +138,16 @@ This section documents the URL paramateters that can be passed to Preside.io to 
     GHSound_Forest.mp3          
     GHSound_LaserShot.mp3        
     GHSound_LuneCalls.mp3  
+
+    [System sounds] - You can use the sounds in the 'System sounds' section of Preside's sound selection screen by prepending the displayed name with '__GHSYSTEMSOUND__' and appending a '.caf' extension.  For example, the 'Choo_Choo' sound would be referenced in the URL as: '__GHSYSTEMSOUND__Choo_Choo.caf'.  Please note that the system sounds might change after iOS updates.
+
+    [Custom sounds] - Custom sounds can be used by tapping on 'Import sound' in the 'Custom' section of Preside's sound selection screens. After the custom sound is imported, it's name will be displayed on that same screen. Use that filename as the value for the alertSound variable in the URL. Custom sounds should be in 'caf' or 'mp3' format.
+
+    *Note* : If your chosen sound isn't playing when notifications are issued, please visit one of the sound selection screens in the app and tap on the chosen sound. That will install the file into a place where iOS can find it when issueing the notification.
+   
+   <br/>
+
+
     
 - *dontWakeApp* - This will deliver the notification without waking the app to perform a background refresh. The 'dontWakeApp' parameter will be ignored if 'ghContentReady' is true or if 'ghEnableEmailActions' is true.
 
@@ -148,6 +158,8 @@ This section documents the URL paramateters that can be passed to Preside.io to 
     - *ghFolderPath* - This is the folder (or INBOX) in which the email was received.
     - *messageId* - This is the messageId for the new email
     - *accountInfoHash* - This is an alternate means of specifying the account .The value can be obtained from the app, but this should generally not be used.
+    
+    <br/>
 
 - *deviceId* - This can be used to send the notification to a specific device. The value can be obtained from the app, but this should generally not be used.
 
