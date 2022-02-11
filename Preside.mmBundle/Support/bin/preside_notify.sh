@@ -31,13 +31,14 @@ if [ "$1" == "--setup" ]; then
             fi
         done
 
-        result=`curl --silent --user "${presideIoUser}:${presideIoPassword}" https://users.preside.io/preside/GHSendPushMsg?alertMsg=Test+notification`
+        status=`curl --silent --output /dev/null --write-out '%{http_code}' --user "${presideIoUser}:${presideIoPassword}" https://users.preside.io/preside/GHSendPushMsg?alertMsg=Test+notification`
+
         if [ $? -ne 0 ]; then
             echo "Test notification failed. Please try again"
             continue;
         fi
 
-        if [[ "${result}" == *'"statusMessage":"OK"'* ]]; then
+        if [ "${status}" = "200" ]; then 
             break
         fi
         echo
