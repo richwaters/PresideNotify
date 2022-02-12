@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh -e -x
 
 
 #############################
@@ -70,13 +70,15 @@ msgTxt="${alertPrefix} From: ${fromStr}, Subject: ${MM_SUBJECT}"
 
 
 curl --silent --user "${presideIoUserPwd}" \
+     --request "POST" \
+     --header 'Content-Type: "application/x-www-form-urlencoded' \
      --data-urlencode "ghContentReady=1" \
      --data-urlencode "messageId=${MM_MESSAGE_ID}" \
      --data-urlencode "ghAccountName=${MM_ACCOUNT}" \
      --data-urlencode "ghFolderPath=${MM_FOLDERPATH}" \
      --data-urlencode "alertMsg=${msgTxt}" \
      --data-urlencode "ghEnableEmailActions=1" \
-     https://users.preside.io/preside/GHSendPushMsg >/dev/null
+     https://be.preside.io/preside/GHSendPushMsg >/dev/null
 
 
 
