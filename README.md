@@ -144,7 +144,7 @@ This section documents the URL paramateters that can be passed to Preside.io to 
     [Custom sounds] - Custom sounds can be used by tapping on 'Import sound' in the 'Custom' section of Preside's sound selection screens. After the custom sound is imported, it's name will be displayed on that same screen. Use that filename as the value for the alertSound variable in the URL. Custom sounds should be in 'caf' or 'mp3' format.
 
     *Note* : If your chosen sound isn't playing when notifications are issued, please visit one of the sound selection screens in the app and tap on the chosen sound. That will install the file into a place where iOS can find it when issueing the notification.
-   
+
    <br/>
 
 
