@@ -52,7 +52,14 @@ Then, configure the script with your credentials with this command:
 
 ${HOME}/Library/Application\ Support/MailMate/Bundles/Preside.mmBundle/Support/bin/preside_notify.sh --setup
 
-Once that's all been done, restart MailMate. Next, select an email and click on "Command" in the Menu Bar and you should see Preside as an option. Click on that and select "SendNotification". If things are working, that should send a notification to your device.
+Once that's all been done, restart MailMate. Next, select an email and click on "Command" in the Menu Bar and you should see Preside as an option. If you don't see Preside as an option in the Command menu, quit MailMate and enter the following command:
+
+rm ~/Library/Caches/com.freron.MailMate/BundlesIndex.binary
+
+Then start MailMate again, and Preside should show up in the Command menu.
+
+Click on that and select "SendNotification". If things are working, that should send a notification to your device.
+
 
 Next, go to the Sources list in the left sidebar of MailMate. For each source you'd like to issue notifications from, control-click and choose "Edit rules ...". Select "Rules" from the top bar on that window, and then tap the + button to add a new rule. [This screenshot](PresideMailMateRuleScreenshot.png) shows what the rule parameters should generally look like. (Advanced users might choose to use a different filter than 'Every message' or even set up multiple rules that uses different notifications depending on the filter.) 
 
